@@ -104,6 +104,7 @@ Add the token to the Authorization header in your requests:
 
 ```bash
 Authorization: Bearer 1|XyzABC...
+Accept: application/json
 ```
 
 All protected REST API endpoints (such as viewing or modifying emails) require this token.
