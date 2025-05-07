@@ -47,43 +47,51 @@ class ParseEmails extends Command
      * @return string|null
      */
     private function extractPlainTextBody(string $rawEmail): ?string
-{
-    $parts = preg_split('/--[_=a-zA-Z0-9\-]+/', $rawEmail);
-
-    foreach ($parts as $part) {
-        // Match plain text
-        if (str_contains($part, 'Content-Type: text/plain')) {
-            $body = preg_split("/\r?\n\r?\n/", $part, 2);
-            if (isset($body[1])) {
-                $text = $body[1];
-
-                if (str_contains($part, 'quoted-printable')) {
-                    $text = quoted_printable_decode($text);
+    {
+        // Separate MIME parts by boundary
+        $parts = preg_split('/--[_=a-zA-Z0-9\-]+/', $rawEmail);
+    
+        foreach ($parts as $part) {
+            // Try text/plain first
+            if (str_contains($part, 'Content-Type: text/plain')) {
+                $body = preg_split("/\r?\n\r?\n/", $part, 2);
+                if (isset($body[1])) {
+                    $text = $body[1];
+                    if (str_contains($part, 'quoted-printable')) {
+                        $text = quoted_printable_decode($text);
+                    }
+                    return cleanText($text);
                 }
-
-                return strip_tags(trim($text));
             }
         }
-    }
-
-    // Fallback: try HTML
-    foreach ($parts as $part) {
-        if (str_contains($part, 'Content-Type: text/html')) {
-            $body = preg_split("/\r?\n\r?\n/", $part, 2);
-            if (isset($body[1])) {
-                $html = $body[1];
-
-                if (str_contains($part, 'quoted-printable')) {
-                    $html = quoted_printable_decode($html);
+    
+        // Fallback: try text/html
+        foreach ($parts as $part) {
+            if (str_contains($part, 'Content-Type: text/html')) {
+                $body = preg_split("/\r?\n\r?\n/", $part, 2);
+                if (isset($body[1])) {
+                    $html = $body[1];
+                    if (str_contains($part, 'quoted-printable')) {
+                        $html = quoted_printable_decode($html);
+                    }
+                    return cleanText(strip_tags($html));
                 }
-
-                return strip_tags(trim($html));
             }
         }
+    
+        return null;
     }
-
-    return null;
-}
+    
+    // Helper method to cleanup weird characters and HTML entities
+    function cleanText(string $input): string
+    {
+        return trim(
+            html_entity_decode(
+                preg_replace('/\s+/', ' ', $input)
+            )
+        );
+    }
+    
 
     
 }
