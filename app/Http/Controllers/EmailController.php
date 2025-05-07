@@ -27,21 +27,22 @@ class EmailController extends Controller
 
         $plainText = $data['email'];
 
-        // Replace <li> with "- text\n"
-        $plainText = preg_replace('/<li>(.*?)<\/li>/i', "- $1\n", $plainText);
+// Înlocuiește <li> cu „- text\n”
+$plainText = preg_replace('/<li>(.*?)<\/li>/i', "- $1\n", $plainText);
 
-        // Add \n after </p>, </h1>–</h6>
-        $plainText = preg_replace('/<\/(p|h[1-6])>/i', "\n", $plainText);
+// Înlocuiește </p> și </h1>-</h6> cu newline
+$plainText = preg_replace('/<\/(p|h[1-6])>/i', "\n", $plainText);
 
-        // Clear HTML tags
-        $plainText = strip_tags($plainText);
+// Scoate celelalte taguri HTML
+$plainText = strip_tags($plainText);
 
-        // Spaces and \n
-        $plainText = preg_replace('/\r\n|\r/', "\n", $plainText); 
-        $plainText = preg_replace('/[ \t]+/', ' ', $plainText); 
-        $plainText = preg_replace('/\n{2,}/', "\n\n", $plainText); 
+// Normalizează spațiile și \n
+$plainText = preg_replace('/\r\n|\r/', "\n", $plainText); // CRLF fix
+$plainText = preg_replace('/[ \t]+/', ' ', $plainText);   // multiple spaces
+$plainText = preg_replace('/\n{2,}/', "\n\n", $plainText); // empty rows
 
-        $data['raw_text'] = trim($plainText);
+$data['raw_text'] = trim($plainText);
+
 
 
         $email = SuccessfulEmail::create($data);
