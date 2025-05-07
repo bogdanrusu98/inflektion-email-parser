@@ -43,16 +43,14 @@ Run Manually:
 
 php artisan emails:parse
 Sample Output:
-yaml
-Copy
-Edit
+
 Parsed email ID: 1
 Parsed email ID: 2
 All emails parsed successfully.
 Example Crontab (Run every 5 minutes):
 cron
-Copy
-Edit
+
+
 */5 * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
 Ensure App\Console\Kernel has:
 
