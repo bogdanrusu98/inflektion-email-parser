@@ -1,61 +1,82 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inflektion Email Parser
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This Laravel project parses raw email content stored in a MySQL database and extracts the plain text body of each email. The extracted body is saved back into the same record under the `raw_text` column.
 
-## About Laravel
+## 📦 Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP >= 8.1
+- Laravel >= 10
+- MySQL
+- Composer
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📁 Table: `successful_emails`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Column        | Type     | Description                              |
+|---------------|----------|------------------------------------------|
+| id            | int      | Primary key                              |
+| email         | longtext | Raw full email content                   |
+| raw_text      | text     | Parsed plain text (nullable, to be filled) |
+| created_at    | datetime | Timestamp                                |
+| updated_at    | datetime | Timestamp                                |
 
-## Learning Laravel
+## ⚙️ Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+git clone https://github.com/bogdanrusu98/inflektion-email-parser.git
+cd inflektion-email-parser
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+Set your .env file with correct database credentials.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+🔧 Command: emails:parse
+This command will:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Fetch all records from successful_emails where raw_text is NULL or empty.
 
-## Laravel Sponsors
+Parse the email field and extract only the plain text content.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Save it into the raw_text column.
 
-### Premium Partners
+Run Manually:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+php artisan emails:parse
+Sample Output:
+yaml
+Copy
+Edit
+Parsed email ID: 1
+Parsed email ID: 2
+All emails parsed successfully.
+Example Crontab (Run every 5 minutes):
+cron
+Copy
+Edit
+*/5 * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+Ensure App\Console\Kernel has:
 
-## Contributing
+php
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+protected function schedule(Schedule $schedule): void
+{
+    $schedule->command('emails:parse')->everyFiveMinutes();
+}
+✅ Testing
+To test with dummy data:
 
-## Code of Conduct
+sql
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+UPDATE successful_emails SET raw_text = '' WHERE raw_text IS NOT NULL;
+php artisan emails:parse
+🔒 Notes
+.env and /vendor are excluded via .gitignore.
 
-## Security Vulnerabilities
+Avoid committing sensitive credentials or auto-generated files.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Contributions welcome. For any questions, open an issue or contact bogdanrusu98.
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
