@@ -29,6 +29,7 @@ cp .env.example .env
 php artisan key:generate
 php artisan migrate
 Set your .env file with correct database credentials.
+```
 
 🔧 Command: emails:parse
 This command will:
@@ -38,35 +39,31 @@ Fetch all records from successful_emails where raw_text is NULL or empty.
 Parse the email field and extract only the plain text content.
 
 Save it into the raw_text column.
-
+```bash
 Run Manually:
+```
 
 php artisan emails:parse
 Sample Output:
-
+```bash
 Parsed email ID: 1
 Parsed email ID: 2
 All emails parsed successfully.
+```
+
 Example Crontab (Run every 5 minutes):
-cron
-
-
+```bash
 */5 * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
-Ensure App\Console\Kernel has:
+```
 
-php
-
-protected function schedule(Schedule $schedule): void
-{
-    $schedule->command('emails:parse')->everyFiveMinutes();
-}
 ✅ Testing
 To test with dummy data:
 
-sql
-
+```bash
 UPDATE successful_emails SET raw_text = '' WHERE raw_text IS NOT NULL;
 php artisan emails:parse
+```
+
 🔒 Notes
 .env and /vendor are excluded via .gitignore.
 
