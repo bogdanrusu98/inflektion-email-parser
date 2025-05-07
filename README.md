@@ -64,6 +64,50 @@ UPDATE successful_emails SET raw_text = '' WHERE raw_text IS NOT NULL;
 php artisan emails:parse
 ```
 
+🔐 API Authentication
+This project uses token-based authentication via Laravel Sanctum or Laravel's built-in token system (depending on implementation). To authenticate, follow the steps below:
+
+1. Register or login via API
+You can use php artisan tinker to manually create a user:
+
+```bash
+php artisan tinker
+
+>>> \App\Models\User::create([
+...   'name' => 'Test User',
+...   'email' => 'user@example.com',
+...   'password' => bcrypt('password123'),
+... ]);
+
+```
+
+2. Get your access token
+Send a POST request to /api/login with the following body:
+
+```bash
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+If credentials are valid, you'll receive a token like:
+
+```bash
+{
+  "token": "1|XyzABC..."
+}
+```
+
+3. Use the token in future API requests
+Add the token to the Authorization header in your requests:
+
+```bash
+Authorization: Bearer 1|XyzABC...
+```
+
+All protected REST API endpoints (such as viewing or modifying emails) require this token.
+
 🔒 Notes
 .env and /vendor are excluded via .gitignore.
 
