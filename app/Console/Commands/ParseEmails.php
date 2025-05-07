@@ -44,7 +44,7 @@ class ParseEmails extends Command
     private function extractPlainTextBody(string $rawEmail): ?string
     {
         $parts = preg_split('/--[_=a-zA-Z0-9\-]+/', $rawEmail);
-
+    
         foreach ($parts as $part) {
             if (str_contains($part, 'Content-Type: text/plain')) {
                 $body = preg_split("/\r?\n\r?\n/", $part, 2);
@@ -57,7 +57,7 @@ class ParseEmails extends Command
                 }
             }
         }
-
+    
         foreach ($parts as $part) {
             if (str_contains($part, 'Content-Type: text/html')) {
                 $body = preg_split("/\r?\n\r?\n/", $part, 2);
@@ -66,13 +66,20 @@ class ParseEmails extends Command
                     if (str_contains($part, 'quoted-printable')) {
                         $html = quoted_printable_decode($html);
                     }
-                    return $this->cleanText(strip_tags($html));
+    
+                    // Remove style and script content before stripping tags
+                    $html = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $html);
+                    $html = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $html);
+                    $html = strip_tags($html);
+    
+                    return $this->cleanText($html);
                 }
             }
         }
-
+    
         return null;
     }
+    
 
     /**
      * Clean up string by removing redundant spaces, decoding HTML entities etc.
