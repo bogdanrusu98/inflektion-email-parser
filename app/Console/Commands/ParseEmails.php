@@ -12,7 +12,12 @@ class ParseEmails extends Command
 
     public function handle()
     {
-        $emails = SuccessfulEmail::whereNull('raw_text')->get();
+        $emails = SuccessfulEmail::where(function ($query) {
+    $query->whereNull('raw_text')
+          ->orWhere('raw_text', '');
+})->get();
+
+
 
         if ($emails->isEmpty()) {
             $this->info('No emails to parse.');
@@ -34,3 +39,8 @@ class ParseEmails extends Command
         $this->info('All emails parsed successfully.');
     }
 }
+
+
+
+
+
