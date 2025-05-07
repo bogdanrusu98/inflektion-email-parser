@@ -1,1 +1,2 @@
 # Laravel core/vendor/node_modules/public/hot/public/storage/storage/*.key/storage/app/public/storage/debugbar/storage/framework/cache/*/storage/framework/sessions/*/storage/framework/views/*/storage/logs/*# Environment files.env.env.* /.env.backup# Laravel Mix / Vite/public/mix-manifest.json/public/build# IDE / OS files.idea.vscode*.sublime-project*.sublime-workspace*.DS_Store*.log# Git merge conflict markers*.orig# Composercomposer.lock# NPM / Yarnpackage-lock.jsonyarn.lockvendor/
+.env
