@@ -47,26 +47,43 @@ class ParseEmails extends Command
      * @return string|null
      */
     private function extractPlainTextBody(string $rawEmail): ?string
-    {
-        $parts = preg_split('/--[_=a-zA-Z0-9\-]+/', $rawEmail);
-    
-        foreach ($parts as $part) {
-            if (str_contains($part, 'Content-Type: text/plain')) {
-                $body = preg_split("/\r?\n\r?\n/", $part, 2);
-                if (isset($body[1])) {
-                    $text = $body[1];
-    
-                    // Decodare quoted-printable dacă e cazul
-                    if (str_contains($part, 'quoted-printable')) {
-                        $text = quoted_printable_decode($text);
-                    }
-    
-                    return strip_tags(trim($text));
+{
+    $parts = preg_split('/--[_=a-zA-Z0-9\-]+/', $rawEmail);
+
+    foreach ($parts as $part) {
+        // Match plain text
+        if (str_contains($part, 'Content-Type: text/plain')) {
+            $body = preg_split("/\r?\n\r?\n/", $part, 2);
+            if (isset($body[1])) {
+                $text = $body[1];
+
+                if (str_contains($part, 'quoted-printable')) {
+                    $text = quoted_printable_decode($text);
                 }
+
+                return strip_tags(trim($text));
             }
         }
-    
-        return null;
     }
+
+    // Fallback: try HTML
+    foreach ($parts as $part) {
+        if (str_contains($part, 'Content-Type: text/html')) {
+            $body = preg_split("/\r?\n\r?\n/", $part, 2);
+            if (isset($body[1])) {
+                $html = $body[1];
+
+                if (str_contains($part, 'quoted-printable')) {
+                    $html = quoted_printable_decode($html);
+                }
+
+                return strip_tags(trim($html));
+            }
+        }
+    }
+
+    return null;
+}
+
     
 }
