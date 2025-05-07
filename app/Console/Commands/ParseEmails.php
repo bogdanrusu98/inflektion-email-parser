@@ -48,25 +48,25 @@ class ParseEmails extends Command
      */
     private function extractPlainTextBody(string $rawEmail): ?string
     {
-        // Split by MIME boundary markers (---...)
         $parts = preg_split('/--[_=a-zA-Z0-9\-]+/', $rawEmail);
-
+    
         foreach ($parts as $part) {
-            // Look for plain text parts with quoted-printable encoding
-            if (str_contains($part, 'Content-Type: text/plain') &&
-                str_contains($part, 'Content-Transfer-Encoding: quoted-printable')) {
-
-                // Extract the body (after headers)
+            if (str_contains($part, 'Content-Type: text/plain')) {
                 $body = preg_split("/\r?\n\r?\n/", $part, 2);
-
                 if (isset($body[1])) {
-                    // Decode quoted-printable and strip HTML tags (if any)
-                    $decoded = quoted_printable_decode($body[1]);
-                    return strip_tags(trim($decoded));
+                    $text = $body[1];
+    
+                    // Decodare quoted-printable dacă e cazul
+                    if (str_contains($part, 'quoted-printable')) {
+                        $text = quoted_printable_decode($text);
+                    }
+    
+                    return strip_tags(trim($text));
                 }
             }
         }
-
+    
         return null;
     }
+    
 }
